@@ -13,8 +13,27 @@ class CatalogTests(unittest.TestCase):
   rows=parse_html('pgm',html,'https://pgm.org.pl/czlonkowie/')
   self.assertEqual(len(rows),1);self.assertEqual(rows[0]['province'],'śląskie');self.assertIn('Producent zaworów',rows[0]['text'])
  def test_agro_country_and_detail(self):
-  rows=parse_html('agrotech','<table><tr><td></td><td><div class="main-title"><a href="/agrotech/lista-wystawcow/a,12">Firma A</a></div></td><td>Polska</td></tr></table>','https://www.targikielce.pl/lista')
+  rows=parse_html('agrotech','<table><tr><td></td><td><div class="main-title"><a href="/agrotech-2026/lista-wystawcow/a,12">Firma A</a></div></td><td>Polska</td></tr></table>','https://www.targikielce.pl/agrotech-2026/lista-wystawcow')
   self.assertEqual(rows[0]['country'],'Polska');self.assertEqual(rows[0]['website'],'')
+  self.assertIn('lista-wystawcow/a,12', rows[0]['source'])
+ def test_agrotech_list_reads_following_pages(self):
+  import json
+  from catalogs import DIRECT_SOURCES
+  html='<div data-vue-app="exhibitors-list" v-init:settings=\'{"searchUrl":"https://www.targikielce.pl/api/modules/exhibitors-list/search/1/2/pl","pager":{"total":2,"rowCount":30}}\' v-cloak></div><table><tr><td></td><td><div class="main-title"><a href="/agrotech-2026/lista-wystawcow/a,1">Firma A</a></div></td><td>Polska</td></tr></table>'
+  page2=json.dumps({'view':'<table><tr><td></td><td><div class="main-title"><a href="/agrotech-2026/lista-wystawcow/b,2">Firma B</a></div></td><td>Polska</td></tr></table>'}).encode()
+  calls=[]
+  class Fetch:
+   def check(self):
+    pass
+   def page(self, url):
+    calls.append(url)
+    if 'pageIndex=2' in url:
+     return page2, 'application/json', url
+    return html.encode(), 'text/html', DIRECT_SOURCES['agrotech'][1]
+  rows=list(collect('agrotech', Fetch(), lambda message: None))
+  self.assertEqual([row['name'] for row in rows], ['Firma A', 'Firma B'])
+  self.assertEqual(DIRECT_SOURCES['agrotech'][1], 'https://www.targikielce.pl/agrotech-2026/lista-wystawcow')
+  self.assertTrue(any('pageIndex=2' in url and url.startswith('https://www.targikielce.pl/api/modules/exhibitors-list/search/') for url in calls))
  def test_vdma_card_scoping(self):
   rows=parse_html('vdma','<div class="association-member"><p class="association-member__title">Firma A</p><a href="https://a.de">WWW</a><a href="mailto:a@example.com">Email</a><div class="association-member__info-address"><li>Berlin</li><li>Deutschland</li></div></div><footer>owner@example.com</footer>','https://www.vdma.eu/de/mitglieder')
   self.assertEqual(rows[0]['country'],'Deutschland');self.assertNotIn('owner@example.com',str(rows))

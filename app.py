@@ -131,6 +131,9 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == '/api/start':
                 research.start(data)
                 return self.json_reply({'ok': True})
+            if self.path == '/api/fill':
+                research.start_fill(data)
+                return self.json_reply({'ok': True})
             if self.path == '/api/analyze':
                 research.start_analysis(data)
                 return self.json_reply({'ok': True})

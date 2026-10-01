@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 DIRECT_SOURCES = {
  'pgm':('PGM — członkowie','https://pgm.org.pl/czlonkowie/'),
  'bvv':('BVV / MSV — wystawcy','https://tikatalog.bvv.cz/'),
- 'agrotech':('AGROTECH — wystawcy','https://www.targikielce.pl/pl/agrotech'),
+ 'agrotech':('AGROTECH 2026 — wystawcy','https://www.targikielce.pl/agrotech-2026/lista-wystawcow'),
  'vdma':('VDMA — firmy członkowskie','https://www.vdma.org/service-firmensuche-produktsuche'),
  'cetop':('CETOP — katalog PDF','https://www.cetop.org/directory/'),
  'europages':('Europages — firmy w Polsce','https://www.europages.pl/przedsiebiorstwa/polska.html'),
@@ -89,6 +89,46 @@ def parse_cetop(body,url,check=lambda:None):
  return rows
 
 
+def agrotech_more(body, fetch, log):
+ """Read the remaining public pages of the AGROTECH 2026 exhibitor list."""
+ from html import unescape
+ raw = body.decode('utf-8', 'replace') if isinstance(body, (bytes, bytearray)) else body
+ mark = "v-init:settings='"
+ start = raw.find(mark)
+ if start < 0:
+  log('AGROTECH: na stronie nie ma pełnej listy — zostają widoczne wiersze.')
+  return []
+ blob = raw[start + len(mark):]
+ end = blob.find("' ")
+ if end < 0:
+  return []
+ try:
+  settings = json.loads(unescape(blob[:end]))
+  search = settings.get('searchUrl') or ''
+  pager = settings.get('pager') or {}
+  total = int(pager.get('total') or 1)
+  count = int(pager.get('rowCount') or 0)
+ except (TypeError, ValueError, KeyError):
+  return []
+ parsed = urlparse(search)
+ if parsed.scheme != 'https' or parsed.netloc != 'www.targikielce.pl' or not parsed.path.startswith('/api/modules/exhibitors-list/search/'):
+  return []
+ if total <= 1:
+  return []
+ if total > 40:
+  log('AGROTECH: lista zgłasza zbyt wiele stron — odczytuję tylko pierwszą.')
+  return []
+ extra = []
+ for page in range(2, total + 1):
+  fetch.check()
+  url = parsed._replace(query=urlencode({'pageIndex': page, 'count': count}), fragment='').geturl()
+  data, _kind, final = fetch.page(url)
+  payload = json.loads(data.decode('utf-8', 'replace') if isinstance(data, (bytes, bytearray)) else data)
+  extra.extend(parse_html('agrotech', payload.get('view') or '', final))
+  log(f'AGROTECH: strona {page} z {total}.')
+ return extra
+
+
 def collect(key,fetch,log,max_pages=None):
  """Yield firm records from every published catalog page. max_pages stops early when set."""
  url=DIRECT_SOURCES[key][1];pending=[url];visited=set();emitted=set();pages=0
@@ -106,7 +146,7 @@ def collect(key,fetch,log,max_pages=None):
     h=urljoin(final,a['href']);t=a.get_text(' ',strip=True).lower();allow=False
     if key=='cetop':allow=h.lower().endswith('.pdf') and 'directory' in h.lower()
     if key=='vdma':allow=urlparse(h).path.endswith('/mitglieder')
-    if key=='agrotech':allow=('agrotech' in h and ('lista-wystawcow' in h and not re.search(r',\d+',h) or t=='poprzednia edycja'))
+    if key=='agrotech':allow=False
     if key=='bvv':allow='msv' in h and '_fexc' in h and 'nom=0' in h and '2029' not in t
     if a.get('rel')==['next'] and urlparse(h).hostname==urlparse(final).hostname:allow=True
     if allow and h not in visited and h not in pending:pending.append(h)
@@ -129,7 +169,7 @@ def collect(key,fetch,log,max_pages=None):
         r=entry(item.get('companyName',''),web,final+'#member-'+str(item.get('id','')),address=', '.join(str(item.get(x) or '') for x in ['address','plz','city','country']),country=item.get('country',''))
         r['contacts']=[dict(person='',role='',email=item.get('email') or '',phone=item.get('phoneNum') or '',source=r['source'],status='Kontakt firmy z katalogu VDMA')];rows.append(r)
       if max_pages is not None and int(count.group(1))>max_pages:log('VDMA: osiągnięto limit stron katalogu; import częściowy.')
-   if key=='agrotech' and rows:log('AGROTECH: odczyt publicznego HTML; dynamiczna dalsza część listy może wymagać dodatkowych adresów.')
+   if key=='agrotech':rows.extend(agrotech_more(body,fetch,log))
   for row in rows:
    fetch.check();ident=(row['name'].casefold(),row['website'] or row['source'])
    if ident in emitted:continue

@@ -58,6 +58,12 @@ class CoreTests(unittest.TestCase):
                 state = research.snapshot()
                 self.assertEqual(len(state['records']), 1)
                 self.assertEqual(state['records'][0]['status'], 'Oczekuje')
+                research.start_fill()
+                deadline = time.time() + 10
+                while research.running and time.time() < deadline:
+                    time.sleep(.02)
+                self.assertEqual(research.records[0]['status'], 'Oczekuje')
+                self.assertFalse(research.records[0].get('category'))
                 research.start_analysis()
                 deadline = time.time() + 10
                 while research.running and time.time() < deadline:
@@ -114,11 +120,11 @@ class CoreTests(unittest.TestCase):
     def test_unavailable_page_is_not_successful_match(self):
         with tempfile.TemporaryDirectory() as tmp:
             research = Research(tmp)
-            with patch('core.Fetcher.page', side_effect=ValueError('robots.txt nie pozwala')):
+            with patch('core.Fetcher.page', side_effect=ValueError('robots.txt nie pozwala')), patch('core.search_web', return_value=[]):
                 research.start(dict(profile='cnc', categories=['automotive'], countries=['PL'], sources=[], seeds='https://example.com', pages=1, max_firms=1))
                 research.worker.join(10)
                 self.assertEqual(research.records[0]['status'], 'Oczekuje')
-                research.start_analysis()
+                research.start_fill()
                 research.worker.join(10)
             self.assertEqual(research.records[0]['status'], 'Nie udało się odczytać strony')
             self.assertEqual(research.progress['errors'], 2)
@@ -154,11 +160,12 @@ class CoreTests(unittest.TestCase):
                 research.start(dict(categories=['agriculture'],countries=['PL'],sources=['web'],engine='duckduckgo',pages=1,max_firms=1))
                 research.worker.join(10)
                 self.assertEqual(research.records[0]['status'], 'Oczekuje')
-                research.start_analysis()
+                research.start_fill()
                 research.worker.join(10)
             self.assertFalse(research.running)
             self.assertEqual(len(research.records),1)
             self.assertTrue(research.records[0]['contacts'])
+            self.assertEqual(research.records[0]['status'], 'Oczekuje')
             self.assertEqual(research.progress['errors'],0)
 
     def test_role_is_not_a_person_and_review_author_is_ignored(self):

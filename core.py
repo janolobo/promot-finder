@@ -206,13 +206,22 @@ def extract(html, url):
             if 'latitude' in obj and 'longitude' in obj and result['lat'] is None:
                 result['lat'], result['lon'] = coords(obj['latitude'], obj['longitude'])
                 result['geo_source'] = url if result['lat'] is not None else ''
-            if 'streetAddress' in obj and not result['address']:
-                result['address'] = ', '.join(str(obj.get(k, '')) for k in ['streetAddress', 'postalCode', 'addressLocality', 'addressCountry'] if isinstance(obj.get(k), str))
+            if any(obj.get(k) for k in ('streetAddress', 'postalCode', 'addressLocality')) and not result['address']:
+                result['address'] = ', '.join(str(obj.get(k, '')) for k in ['streetAddress', 'postalCode', 'addressLocality', 'addressCountry'] if isinstance(obj.get(k), str) and obj.get(k))
             if any(t in types for t in ['Organization', 'LocalBusiness', 'Corporation', 'AutomotiveBusiness', 'Store', 'ProfessionalService']) and not result['name']:
                 result['name'] = str(obj.get('name', ''))
-    address_node = soup.select_one('[itemprop=address], address')
-    if address_node and not result['address']:
-        result['address'] = address_node.get_text(' ', strip=True)
+    from geolocation import address_rank, find_address
+    for box in soup.select('footer, [itemprop=address], address'):
+        found = find_address(box.get_text(' ', strip=True))
+        if address_rank(found) > address_rank(result['address']):
+            result['address'] = found
+    street = soup.select_one('[itemprop=streetAddress]')
+    postal = soup.select_one('[itemprop=postalCode]')
+    locality = soup.select_one('[itemprop=addressLocality]')
+    if street or postal or locality:
+        joined = ', '.join(node.get_text(' ', strip=True) for node in (street, postal, locality) if node and node.get_text(strip=True))
+        if address_rank(joined) > address_rank(result['address']):
+            result['address'] = joined
     if result['lat'] is None:
         destinations = set(re.findall(r'https://www\.google\.com/maps/dir/[^\s\"\'<>]*?[?&]destination=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)', unescape(unquote(str(soup)))))
         if len(destinations) == 1:
@@ -221,6 +230,9 @@ def extract(html, url):
     for node in soup(['script', 'style', 'noscript']):
         node.decompose()
     result['text'] = soup.get_text(' ', strip=True)[:100000]
+    found = find_address(result['text'])
+    if address_rank(found) > address_rank(result['address']):
+        result['address'] = found
     if not result['name']:
         result['name'] = soup.title.get_text(' ', strip=True)[:180] if soup.title else domain(url)
     # Explicit Person microdata preserves association, unlike page-wide email matching.
@@ -542,7 +554,7 @@ class Research:
                         add(item['website'],item['name'],item['source'],item.get('lat'),item.get('lon'),item['address'],item['contacts'],listing_id=item['source']+'|'+item['name'] if not item['website'] else '')
                         if len(queue)>before:
                             row=queue[-1]
-                            row.update(catalog=name,country=item.get('country',''),catalog_province=province,province=province,osm_text=item.get('text',''),groups=qualify(item.get('text',''))[0],role_evidence=qualify(item.get('text',''))[1])
+                            row.update(catalog=name,country=item.get('country',''),catalog_province=province,province=province,osm_text=item.get('text',''),groups=['Do weryfikacji'],role_evidence='')
                             imported+=1
                             if self.local_index:
                                 match=self.local_index.find(row)
@@ -581,7 +593,7 @@ class Research:
                         ct=dict(person='',role='',email=item['email'],phone=item['phone'],source=item['source'],status='Kontakt obiektu OSM — do sprawdzenia')
                         add(item['website'],item['name'],item['source'],item['lat'],item['lon'],item['address'],[ct] if item['email'] or item['phone'] else [],item['source'])
                         if len(queue)>before:
-                            queue[-1].update(province=item['province'],geo_precision=item['geo_precision'],groups=qualify(item['text'])[0],role_evidence=qualify(item['text'])[1],osm_text=item['text'])
+                            queue[-1].update(province=item['province'],geo_precision=item['geo_precision'],groups=['Do weryfikacji'],role_evidence='',osm_text=item['text'])
                     if len(queue)>=c['max_firms']: break
                 self.checkpoint()
             elif 'osm' in c['sources']:
@@ -679,12 +691,12 @@ class Research:
             with self.lock:
                 self.progress['queries_skipped'] = self.progress['queries_total'] - self.progress['queries_done']
                 self.records = queue
-                self.progress.update(phase='Zebrano firmy — analiza przyciskiem nad mapą', done=0, total=0)
-            self.log(f'Znaleziono {len(queue)} kandydatów. Analiza stron czeka na przycisk „Analizuj firmy”.')
+                self.progress.update(phase='Zebrano firmy — uzupełnij dane, potem analizuj', done=0, total=0)
+            self.log(f'Znaleziono {len(queue)} kandydatów. Adres i strona: „Uzupełnij dane”. Statusy legendy: „Analizuj firmy”.')
             if c.get('geocode', False) or self.local_index is not None:
                 self.locate_records()
             with self.lock:
-                self.progress['phase'] = 'Zakończono zbieranie — analiza przyciskiem nad mapą' if queue else ('Nie udało się wyszukać firm — błąd źródła; sprawdź log' if self.progress['errors'] else 'Brak firm dla tych ustawień — sprawdź tropy i zmień zapytania')
+                self.progress['phase'] = 'Zakończono zbieranie — uzupełnij dane, potem analizuj firmy' if queue else ('Nie udało się wyszukać firm — błąd źródła; sprawdź log' if self.progress['errors'] else 'Brak firm dla tych ustawień — sprawdź tropy i zmień zapytania')
             if 'linkedin' in c['sources'] or 'maps' in c['sources']:
                 self.log('LinkedIn / Google Maps: linki wyszukiwania ręcznego są przy firmach; serwisy nie były scrapowane.')
         except (Cancelled, InterruptedError):
@@ -770,7 +782,13 @@ class Research:
             if self.progress['geo_done'] % 20 == 0 or self.progress['geo_done'] == len(self.records):
                 self.checkpoint()
 
+    def start_fill(self, config=None):
+        self._launch(self.fill_worker, config)
+
     def start_analysis(self, config=None):
+        self._launch(self.judgement_worker, config)
+
+    def _launch(self, worker, config=None):
         config = config or {}
         with self.lock:
             if self.running:
@@ -800,27 +818,23 @@ class Research:
             self.logs = []
             self.stop.clear()
             self.running = True
-            self.worker = threading.Thread(target=self.analysis_worker, daemon=True)
+            self.worker = threading.Thread(target=worker, daemon=True)
             self.worker.start()
 
-    def analysis_worker(self):
+    def fill_worker(self):
         fetch = Fetcher(self.stop, self.log)
         try:
             records = list(self.records)
             with self.lock:
-                self.progress.update(phase='Analiza firm', done=0, total=len(records))
-            self.log(f'Analiza {len(records)} firm na żądanie.')
+                self.progress.update(phase='Uzupełnianie danych', done=0, total=len(records))
+            self.log(f'Uzupełniam dane {len(records)} firm.')
             for record in records:
                 fetch.check()
-                self.log('Analizuję: ' + record['name'])
-                with self.lock:
-                    record['status'] = 'Analiza'
+                self.log('Uzupełniam: ' + record['name'])
                 try:
                     if self.config.get('enrich_web', True):
                         self.enrich(record, fetch)
-                    else:
-                        record['category'], record['evidence'] = classify(record.get('osm_text', record['name']), self.config.get('categories', []))
-                        record['status'] = 'Dane lokalne OSM — do kwalifikacji'
+                    self.place_record(record)
                 except Cancelled:
                     raise
                 except Exception as exc:
@@ -828,6 +842,36 @@ class Research:
                         record['status'] = 'Błąd pobrania — do sprawdzenia'
                     self.error(record['name'], exc)
                 with self.lock:
+                    record['checked_at'] = now()
+                    self.progress['done'] += 1
+                self.checkpoint()
+            with self.lock:
+                self.progress['phase'] = 'Zakończono uzupełnianie danych'
+            self.log('Uzupełnianie danych zakończone.')
+        except Cancelled:
+            with self.lock:
+                self.progress['phase'] = 'Zatrzymano uzupełnianie — wyniki częściowe'
+            self.log('Zatrzymano uzupełnianie na żądanie użytkownika.')
+        except Exception as exc:
+            with self.lock:
+                self.progress['phase'] = 'Błąd uzupełniania — wyniki częściowe'
+            self.error('Uzupełnianie danych', exc)
+        finally:
+            self._finish_job('Eksport po uzupełnieniu')
+
+    def judgement_worker(self):
+        try:
+            records = list(self.records)
+            with self.lock:
+                self.progress.update(phase='Analiza firm', done=0, total=len(records))
+            self.log(f'Analizuję {len(records)} firm: konkurencja, dopasowanie słów i status.')
+            for record in records:
+                if self.stop.is_set():
+                    raise Cancelled()
+                self.log('Analizuję: ' + record['name'])
+                with self.lock:
+                    record['status'] = 'Analiza'
+                    self.apply_judgement(record)
                     record['checked_at'] = now()
                     self.progress['done'] += 1
                 self.checkpoint()
@@ -846,15 +890,51 @@ class Research:
                 self.progress['phase'] = 'Błąd analizy — wyniki częściowe'
             self.error('Analiza firm', exc)
         finally:
+            self._finish_job('Eksport po analizie')
+
+    def _finish_job(self, export_label):
+        self.checkpoint()
+        try:
+            if self.run_id:
+                export_xlsx(self.snapshot(), self.folder / self.run_id / 'wyniki.xlsx')
+        except Exception as exc:
+            self.error(export_label, exc)
+        with self.lock:
+            self.running = False
             self.checkpoint()
-            try:
-                if self.run_id:
-                    export_xlsx(self.snapshot(), self.folder / self.run_id / 'wyniki.xlsx')
-            except Exception as exc:
-                self.error('Eksport po analizie', exc)
-            with self.lock:
-                self.running = False
-                self.checkpoint()
+
+    def apply_judgement(self, record):
+        """Assign legend groups only: competition, word match, pending, or review."""
+        body = ' '.join(part for part in (record.get('name', ''), record.get('osm_text', ''), record.get('page_text', ''), record.get('address', '')) if part)
+        cats = [key for key in self.config.get('categories') or [] if key in CATEGORIES]
+        category, evidence = classify(record.get('page_text') or record.get('osm_text') or body, cats) if cats else ('', '')
+        groups, role = qualify(body)
+        record['groups'] = groups
+        record['role_evidence'] = role
+        record['category'] = category
+        record['evidence'] = (evidence or '')[:3000]
+        record['status'] = 'Dopasowanie słów — wymaga kwalifikacji' if category else 'Do sprawdzenia'
+
+    def place_record(self, record):
+        """Put a checked firm on the map from its address, or from the city when that is all we have."""
+        from geolocation import Locator, city_note, locate_query
+        address = record.get('address') or ''
+        query, city_only = locate_query(address)
+        has_point = isinstance(record.get('lat'), (int, float))
+        city_pin = str(record.get('geo_precision') or '').startswith('Miasto')
+        if has_point and not (query and not city_only and city_pin):
+            return
+        if getattr(self, 'analysis_locator', None) is None:
+            self.analysis_locator = Locator(self.folder, self.stop)
+        if not str(query).strip():
+            return
+        result = self.analysis_locator.locate(query)
+        if not isinstance(result, dict) or result.get('lat') is None:
+            return
+        if city_only or city_note(address):
+            result = dict(result, geo_precision='Miasto — przybliżenie, nie siedziba firmy')
+        with self.lock:
+            record.update(lat=result['lat'], lon=result['lon'], geo_source=result.get('geo_source', ''), geo_precision=result.get('geo_precision', ''), geo_label=result.get('geo_label', ''))
 
     def start_locations(self):
         with self.lock:
@@ -898,11 +978,46 @@ class Research:
                 self.running = False
                 self.checkpoint()
 
-    def enrich(self, record, fetch):
-        if not record['website']:
+    def lookup_site(self, record):
+        """Find the company page by its exact name when the catalog has no working site."""
+        name = re.sub(r'\s+', ' ', record.get('name') or '').strip().replace('"', '')
+        if len(name) < 3:
+            return ''
+        query = '"' + name + '"'
+        self.log('DuckDuckGo, dokładna nazwa: ' + query)
+        skip = {domain(record.get('source') or ''), domain(record.get('website') or '')}
+        skip.discard('')
+        try:
+            hits = search_web(query, 'PL', {'engine': 'duckduckgo'})
+        except SearchBlocked as exc:
+            self.log(str(exc))
+            return ''
+        except Exception as exc:
+            self.error(record.get('name') or query, exc)
+            return ''
+        for hit in hits:
+            url = str(hit.get('url') or '').split('#')[0]
+            host = domain(url)
+            if not url.startswith(('http://', 'https://')) or not host:
+                continue
+            if is_domain(host, DENIED) or is_domain(host, ('duckduckgo.com', 'bing.com', 'yahoo.com')):
+                continue
+            if any(is_domain(host, (item,)) for item in skip):
+                continue
+            return url
+        return ''
+
+    def enrich(self, record, fetch, searched=False):
+        from geolocation import address_rank, find_address
+        if not record.get('website'):
+            site = self.lookup_site(record)
+            searched = True
+            if not site:
+                self.log(record['name'] + ': DuckDuckGo nie wskazał strony firmy.')
+                return
             with self.lock:
-                record['status'] = 'Wpis firmy z katalogu — strona WWW do sprawdzenia'
-            return
+                record['website'] = site
+            self.log(record['name'] + ': strona z DuckDuckGo — ' + site)
         pending, visited, texts = [record['website']], set(), []
         for _ in range(self.config['pages']):
             if not pending:
@@ -917,7 +1032,7 @@ class Research:
                     from pypdf import PdfReader
                     reader = PdfReader(io.BytesIO(body))
                     text = '\n'.join((p.extract_text() or '')[:20000] for p in reader.pages[:15])
-                    parsed = dict(text=text, name='', address='', lat=None, lon=None, contacts=[dict(person='', role='', email=e, phone='', source=final, status='Kontakt PDF — bez przypisania do osoby') for e in set(EMAIL.findall(text))], links=[])
+                    parsed = dict(text=text, name='', address=find_address(text), lat=None, lon=None, contacts=[dict(person='', role='', email=e, phone='', source=final, status='Kontakt PDF — bez przypisania do osoby') for e in set(EMAIL.findall(text))], links=[])
                 elif 'html' in kind or not kind:
                     parsed = extract(body, final)
                 else:
@@ -931,8 +1046,11 @@ class Research:
             with self.lock:
                 if len(texts) == 1 and not record['source'].startswith('https://www.openstreetmap.org/'):
                     record['name'] = parsed['name'] or record['name']
-                if not record['address']:
-                    record['address'] = parsed['address']
+                if not record.get('website'):
+                    record['website'] = final
+                page_address = parsed.get('address') or ''
+                if address_rank(page_address) > address_rank(record.get('address')):
+                    record['address'] = page_address
                 if record['lat'] is None and parsed['lat'] is not None:
                     record['lat'], record['lon'], record['geo_source'] = parsed['lat'], parsed['lon'], final
                 for contact in parsed['contacts']:
@@ -940,24 +1058,36 @@ class Research:
                     if not any(tuple(x.get(k, '').lower() for k in ['person', 'email', 'phone']) == key for x in record['contacts']):
                         record['contacts'].append(contact)
             for href, label in parsed['links']:
-                if domain(href) == domain(final) and href not in visited and href not in pending and re.search(r'contact|kontakt|team|about|unternehmen|impressum|purchas|supplier|produkt|product|oferta|zakup', href + ' ' + label, re.I):
+                if domain(href) == domain(final) and href not in visited and href not in pending and re.search(r'contact|kontakt|adres|siedzib|lokaliz|dojazd|about|o-nas|o_nas|onas|firma|unternehmen|impressum|biuro|team|purchas|supplier|produkt|product|oferta|zakup', href + ' ' + label, re.I):
                     pending.append(href)
-            pending.sort(key=lambda x: 0 if re.search(r'contact|kontakt|team|purchas|supplier', x, re.I) else 1)
-            if len(texts) == 1 and domain(final):
+            if len(texts) == 1 and domain(final) and address_rank(record.get('address')) < 4:
                 root = '{0.scheme}://{0.netloc}/'.format(urlparse(final))
-                if root not in visited and root not in pending:
-                    pending.append(root)
-        categories, evidence = [], []
-        for text, url in texts:
-            cat, proof = classify(text, self.config['categories'])
-            if cat:
-                categories.append(cat)
-                evidence.append(proof + ' [' + url + ']')
+                for path in ('/kontakt', '/contact', '/pl/kontakt', '/o-firmie', '/o-nas', '/impressum', '/lokalizacja'):
+                    candidate = urljoin(root, path)
+                    if candidate not in visited and candidate not in pending:
+                        pending.append(candidate)
+            pending.sort(key=lambda x: 0 if re.search(r'kontakt|contact|adres|siedzib|lokaliz|impressum|biuro', x, re.I) else 1)
+        page_text = '\n'.join(text for text, _url in texts)[:50000]
+        found = find_address(page_text)
         with self.lock:
-            record['groups'], record['role_evidence'] = qualify(record['name'] + ' ' + record.get('osm_text', '') + ' ' + ' '.join(t for t,u in texts))
-            record['category'] = '; '.join(dict.fromkeys(categories))
-            record['evidence'] = '\n'.join(evidence)[:3000]
-            record['status'] = 'Dopasowanie słów — wymaga kwalifikacji' if categories else ('Brak potwierdzonego dopasowania' if texts else 'Nie udało się odczytać strony')
+            if address_rank(found) > address_rank(record.get('address')):
+                record['address'] = found
+            if page_text:
+                record['page_text'] = page_text[:20000]
+            elif record.get('website') and searched:
+                record['status'] = 'Nie udało się odczytać strony'
+        if not page_text and record.get('website') and not searched:
+            site = self.lookup_site(record)
+            if site:
+                with self.lock:
+                    record['website'] = site
+                    if record.get('status') == 'Nie udało się odczytać strony':
+                        record['status'] = 'Oczekuje'
+                self.log(record['name'] + ': strona z DuckDuckGo — ' + site)
+                self.enrich(record, fetch, searched=True)
+            else:
+                with self.lock:
+                    record['status'] = 'Nie udało się odczytać strony'
 
 def safe_cell(value):
     if isinstance(value, list):

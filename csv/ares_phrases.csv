@@ -1,0 +1,71 @@
+phrase,category,priority,forging_probability,negative_keywords
+kovárna,transmissions,100,high,restaurace;galerie;spolek;muzeum
+výkovky,transmissions,100,high,umělecké;šperky
+zápustkové výkovky,transmissions,100,high,
+kovářská výroba,transmissions,98,high,umělecká
+kovárenská,transmissions,98,high,škola;spolek
+kování kovů,transmissions,97,high,umělecké
+lisovna kovů,automotive,97,high,plastů
+lisování kovů,automotive,96,high,plastů
+tváření kovů,automotive,96,high,
+obrábění kovů,transmissions,95,high,
+CNC obrábění,transmissions,95,high,školení
+přesné obrábění,transmissions,94,high,
+strojírenská výroba,transmissions,94,high,projektování
+strojírny,transmissions,93,high,hotel;restaurace
+strojírenská,transmissions,92,high,škola
+ozubená kola,transmissions,100,high,prodej
+výroba převodovek,transmissions,100,high,opravy
+převodovky,transmissions,98,high,autoservis;prodej
+převodovka,transmissions,96,high,autoservis
+převodové ústrojí,transmissions,96,high,
+převodové skříně,transmissions,95,high,
+převodové hřídele,transmissions,100,high,
+hnací hřídele,transmissions,100,high,opravy
+kloubové hřídele,transmissions,100,high,opravy
+kardanové hřídele,transmissions,100,high,opravy
+kardany,transmissions,94,high,autoservis
+klikové hřídele,transmissions,99,high,opravy
+drážkované hřídele,transmissions,98,high,
+ložiska,transmissions,88,medium,prodej;eshop
+výroba ložisek,transmissions,96,high,prodej
+nápravy,automotive,98,high,servis;prodej
+výroba náprav,automotive,100,high,
+automobilové díly,automotive,91,high,prodej;eshop
+automobilové komponenty,automotive,94,high,prodej
+autodíly výroba,automotive,92,high,prodejna
+podvozkové díly,automotive,96,high,prodej
+podvozkové komponenty,automotive,97,high,
+komponenty vozidel,automotive,92,high,prodej
+užitková vozidla díly,automotive,86,medium,prodej
+hydraulika výroba,hydraulics,98,high,servis;prodej
+hydraulické komponenty,hydraulics,98,high,prodej
+hydraulické válce,hydraulics,99,high,opravy
+hydraulické čerpadla,hydraulics,96,high,opravy
+hydraulické ventily,hydraulics,97,high,prodej
+hydraulické agregáty,hydraulics,94,high,servis
+průmyslová hydraulika,hydraulics,96,high,servis
+mobilní hydraulika,hydraulics,95,high,servis
+výroba armatur,hydraulics,96,high,prodej
+průmyslové ventily,hydraulics,96,high,prodej
+zemědělské stroje výroba,agriculture,98,high,prodej;bazar
+zemědělská technika výroba,agriculture,96,high,prodej
+traktorové díly,agriculture,96,high,prodej
+traktorové nápravy,agriculture,100,high,prodej
+traktorové převodovky,agriculture,100,high,opravy
+sklízecí stroje,agriculture,90,high,prodej;bazar
+lesní stroje výroba,agriculture,92,high,prodej
+důlní stroje,mining,96,high,prodej;bazar
+důlní technika,mining,94,high,poradenství
+stavební stroje výroba,mining,95,high,prodej;bazar
+stavební stroje díly,mining,94,high,prodej
+rypadla díly,mining,93,high,prodej
+jeřábové komponenty,mining,91,high,prodej
+dopravníková technika,mining,89,high,prodej
+železniční vozidla,railway,99,high,prodej
+železniční komponenty,railway,99,high,prodej
+železniční nápravy,railway,100,high,prodej
+železniční dvojkolí,railway,100,high,prodej
+kolejová vozidla,railway,98,high,prodej
+podvozky kolejových vozidel,railway,100,high,prodej
+lokomotivní díly,railway,95,high,prodej

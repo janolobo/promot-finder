@@ -1,0 +1,58 @@
+phrase,category,priority,forging_probability,negative_keywords
+Die Forging,automotive,100,high,Trader;Dealer;Software
+Closed die forging,automotive,99,high,Trader;Dealer
+Drop forging,automotive,98,high,Trader;Dealer
+Impression die forging,automotive,97,high,Trader;Dealer
+Upset Parts,automotive,96,high,Trader;Dealer
+Upset forging,automotive,95,high,Trader;Dealer
+Open die forging,automotive,94,high,Trader;Art forging
+Hammer forging,automotive,93,high,Trader;Art forging
+Press forging,automotive,92,high,Trader;Dealer
+Forged parts,automotive,97,high,Trader;Spare parts trade
+Forged components,automotive,96,high,Trader;Spare parts trade
+Forging Technology,automotive,90,high,Consulting;Software
+Hot-pressed parts,automotive,91,high,Trader;Plastics
+Hot-pressed aluminium part,automotive,88,high,Trader;Casting only
+Schmiedeteile,automotive,98,high,Händler;Kunstschmiede
+Gesenkschmiedeteile,automotive,99,high,Händler
+Freiformschmiedeteile,automotive,94,high,Händler;Kunstschmiede
+Stauchteile,automotive,93,high,Händler
+Chassis parts,automotive,94,high,Dealer;Rubber;Plastics
+Chassis components,automotive,95,high,Dealer;Rubber;Plastics
+Steering parts,automotive,94,high,Dealer;Electronics
+Steering components,automotive,95,high,Dealer;Electronics
+Axle parts,automotive,95,high,Dealer;Spare parts trade
+Axle components,automotive,97,high,Dealer;Trailer accessories
+Wheel hubs,automotive,92,high,Dealer;Spare parts trade
+Automotive suppliers,automotive,78,medium,Dealer;Software;Electronics
+Automotive components,automotive,80,medium,Dealer;Plastics;Electronics
+Drive shafts,transmissions,100,high,Dealer;Repair
+Cardan shafts,transmissions,99,high,Dealer;Repair
+Gear shafts,transmissions,100,high,Dealer;Repair
+Crankshafts,transmissions,99,high,Dealer;Engine reconditioning
+Bevel gears,transmissions,92,high,Dealer;Plastic gears
+Industrial gearboxes,transmissions,92,high,Dealer;Repair
+Getriebewellen,transmissions,100,high,Händler;Reparatur
+Antriebswellen,transmissions,100,high,Händler;Reparatur
+Agricultural machinery,agriculture,82,high,Dealer;Rental;Used machinery
+Agricultural machinery parts,agriculture,88,high,Dealer;Spare parts trade
+Tractor parts,agriculture,87,high,Dealer;Spare parts trade
+Tractor axles,agriculture,99,high,Dealer;Spare parts trade
+Landmaschinenteile,agriculture,90,high,Händler;Ersatzteilhandel
+Construction machinery parts,mining,92,high,Dealer;Spare parts trade
+Construction machinery components,mining,94,high,Dealer;Electronics
+Excavator parts,mining,89,high,Dealer;Spare parts trade
+Baumaschinenteile,mining,91,high,Händler;Ersatzteilhandel
+Rail vehicle components,railway,96,high,Dealer;Spare parts trade
+Railway axles,railway,100,high,Dealer;Spare parts trade
+Wheelset axles,railway,100,high,Dealer;Spare parts trade
+Bogie parts,railway,98,high,Dealer;Spare parts trade
+Hydraulic components,hydraulics,93,high,Dealer;Hoses;Seals
+Hydraulic cylinders,hydraulics,91,high,Dealer;Repair
+Hydraulic valves,hydraulics,93,high,Dealer;Solenoid valves
+Hydraulikzylinder,hydraulics,92,high,Händler;Reparatur
+Industriearmaturen,hydraulics,86,high,Händler;Sanitär
+Iron castings,construction,88,high,Dealer;Art casting
+Foundry Works,construction,80,medium,Dealer;Art casting
+Eisenguss,construction,87,high,Händler
+Gussteile,construction,78,medium,Händler;Kunstguss

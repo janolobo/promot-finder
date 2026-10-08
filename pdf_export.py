@@ -27,7 +27,7 @@ def export_pdf(snapshot, ids, filters):
     def paragraph(text):return Paragraph(escape(str(text or '')),styles['Normal'])
     for i,r in enumerate(rows,1):
         story.append(KeepTogether([Paragraph(escape(f"{i}. {r['name']}"),styles['Heading2']),paragraph(' · '.join(r.get('groups',[])))]))
-        for label,key in [('Województwo','province'),('Adres','address'),('Katalog','catalog'),('Dokładność','geo_precision'),('Weryfikacja OSM','osm_check')]:
+        for label,key in [('Adres','address'),('Katalog','catalog'),('Dokładność','geo_precision'),('Weryfikacja OSM','osm_check')]:
             if r.get(key):story.append(paragraph(label+': '+str(r[key])))
         if r.get('lat') is not None:story.append(paragraph(f"Współrzędne: {r['lat']}, {r['lon']}"))
         for label,key in [('Strona firmy','website'),('Źródło firmy','source')]:

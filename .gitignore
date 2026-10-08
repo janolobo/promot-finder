@@ -1,8 +1,12 @@
 .venv/
+.venv-argos/
+.promot-auth.json
 __pycache__/
 *.pyc
 .DS_Store
 wyniki/
-poland-latest.osm.pbf
-osm_index.json
+cache/
+*-latest.osm.pbf
+*.osm.pbf.part
+osm_index*.json
 *.tmp

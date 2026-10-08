@@ -1,0 +1,11 @@
+phrase,category,priority,forging_probability,negative_keywords
+kuźnia,automotive,95,high,handel;sklep
+Gesenkschmiede,automotive,96,high,Händler
+forging company,automotive,94,high,dealer;software
+producent odkuwek,automotive,97,high,handel
+kucie matrycowe,automotive,93,high,
+Schmiedewerk,automotive,92,high,Händler
+drop forging,automotive,90,high,dealer
+kovárna,automotive,91,high,obchod
+closed die forging,automotive,88,high,
+odkuwki matrycowe,automotive,89,high,handel

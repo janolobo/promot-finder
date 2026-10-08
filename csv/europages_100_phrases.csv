@@ -1,0 +1,101 @@
+phrase,category,priority,forging_probability,negative_keywords
+Automotive suppliers,automotive,72,medium,Dealer;Service provider;Software;Electronics
+Automotive components,automotive,78,medium,Dealer;Plastics;Electronics
+Automotive parts,automotive,68,medium,Dealer;Spare parts trade;Accessories
+Vehicle components,automotive,76,medium,Dealer;Electronics;Plastics
+Vehicle parts,automotive,66,medium,Dealer;Spare parts trade;Accessories
+Chassis parts,automotive,93,high,Dealer;Rubber;Plastics
+Chassis components,automotive,94,high,Dealer;Rubber;Plastics
+Steering parts,automotive,94,high,Dealer;Electronics;Plastics
+Steering components,automotive,95,high,Dealer;Electronics;Plastics
+Axle components,automotive,97,high,Dealer;Trailer accessories
+Axle parts,automotive,95,high,Dealer;Spare parts trade
+Wheel hubs,automotive,92,high,Dealer;Spare parts trade
+Wheel hub parts,automotive,90,high,Dealer;Spare parts trade
+Commercial vehicle parts,automotive,83,high,Dealer;Spare parts trade;Bodywork
+Commercial vehicle components,automotive,86,high,Dealer;Electronics;Plastics
+Truck parts,automotive,79,medium,Dealer;Spare parts trade;Accessories
+Trailer components,automotive,72,medium,Dealer;Lighting;Plastics
+Transmission parts,transmissions,98,high,Dealer;Repair;Spare parts trade
+Transmission components,transmissions,99,high,Dealer;Repair
+Gearbox manufacturers,transmissions,96,high,Dealer;Repair;Engineering
+Vehicle transmissions,transmissions,96,high,Dealer;Repair
+Industrial gearboxes,transmissions,92,high,Dealer;Repair
+Gear shafts,transmissions,100,high,Dealer;Repair
+Drive shafts,transmissions,100,high,Dealer;Spare parts trade;Repair
+Cardan shafts,transmissions,99,high,Dealer;Spare parts trade;Repair
+Propeller shafts,transmissions,99,high,Dealer;Spare parts trade;Repair
+Splined shafts,transmissions,97,high,Dealer;Standard parts
+Spline shafts,transmissions,97,high,Dealer;Standard parts
+Toothed shafts,transmissions,97,high,Dealer;Standard parts
+Crankshafts,transmissions,99,high,Dealer;Repair;Engine reconditioning
+Gears,transmissions,91,high,Dealer;Plastic gears
+Bevel gears,transmissions,92,high,Dealer;Plastic gears
+Planetary gearboxes,transmissions,89,high,Dealer;Repair
+Drive technology,transmissions,78,medium,Dealer;Electric motors;Software
+Agricultural machinery,agriculture,82,high,Dealer;Rental;Used machinery
+Agricultural machinery manufacturers,agriculture,90,high,Dealer;Rental
+Agricultural machinery parts,agriculture,88,high,Dealer;Spare parts trade
+Agricultural machinery components,agriculture,91,high,Dealer;Spare parts trade
+Agricultural machinery spare parts,agriculture,73,medium,Dealer;Spare parts trade
+Tractor parts,agriculture,87,high,Dealer;Spare parts trade
+Tractor components,agriculture,91,high,Dealer;Spare parts trade
+Tractor axles,agriculture,99,high,Dealer;Spare parts trade
+Tractor transmissions,agriculture,98,high,Dealer;Repair;Spare parts trade
+Combine harvester parts,agriculture,84,high,Dealer;Spare parts trade
+Harvesting machine parts,agriculture,84,high,Dealer;Spare parts trade
+Harvesting machinery,agriculture,78,medium,Dealer;Rental;Used machinery
+Forestry machinery,agriculture,82,high,Dealer;Rental;Used machinery
+Forestry machinery parts,agriculture,86,high,Dealer;Spare parts trade
+Tillage machinery,agriculture,78,medium,Dealer;Rental
+Agricultural technology,agriculture,70,medium,Dealer;Software;Consulting
+Agricultural machine parts,agriculture,86,high,Dealer;Spare parts trade
+Mining machinery,mining,88,high,Dealer;Rental;Used machinery
+Mining machinery parts,mining,94,high,Dealer;Spare parts trade
+Mining technology,mining,79,medium,Dealer;Consulting;Engineering
+Mining components,mining,91,high,Dealer;Electronics
+Construction machinery,mining,82,high,Dealer;Rental;Used machinery
+Construction machinery parts,mining,92,high,Dealer;Spare parts trade
+Construction machinery components,mining,94,high,Dealer;Electronics;Plastics
+Construction machinery axles,mining,99,high,Dealer;Spare parts trade
+Excavator parts,mining,89,high,Dealer;Spare parts trade
+Excavator components,mining,91,high,Dealer;Spare parts trade
+Wheel loader parts,mining,89,high,Dealer;Spare parts trade
+Tracked vehicle parts,mining,86,high,Dealer;Spare parts trade
+Heavy duty components,mining,89,high,Dealer;Logistics
+Heavy machinery manufacturing,mining,86,high,Dealer;Engineering
+Conveyor technology components,mining,76,medium,Dealer;Plastics;Electronics
+Lifting equipment parts,mining,77,medium,Dealer;Spare parts trade
+Crane components,mining,81,high,Dealer;Spare parts trade
+Rail vehicle components,railway,96,high,Dealer;Spare parts trade
+Rail vehicle parts,railway,94,high,Dealer;Spare parts trade
+Railway vehicle components,railway,96,high,Dealer;Electronics;Interior fittings
+Spare parts for rail vehicles,railway,82,medium,Dealer;Spare parts trade
+Railway technology,railway,76,medium,Dealer;Signalling;Electronics
+Railway technology components,railway,84,high,Dealer;Signalling;Electronics
+Railway parts,railway,91,high,Dealer;Spare parts trade
+Railway components,railway,93,high,Dealer;Electronics
+Railway wheelsets,railway,99,high,Dealer;Spare parts trade
+Wheelset axles,railway,100,high,Dealer;Spare parts trade
+Railway axles,railway,100,high,Dealer;Spare parts trade
+Rail vehicle axles,railway,100,high,Dealer;Spare parts trade
+Bogie parts,railway,98,high,Dealer;Spare parts trade
+Bogie components,railway,98,high,Dealer;Electronics
+Rail vehicle couplings,railway,94,high,Dealer;Spare parts trade
+Locomotive parts,railway,88,high,Dealer;Spare parts trade
+Hydraulic components,hydraulics,93,high,Dealer;Hoses;Seals
+Hydraulic parts,hydraulics,87,high,Dealer;Hoses;Seals
+Hydraulic manufacturers,hydraulics,86,high,Dealer;Service
+Hydraulic cylinders,hydraulics,91,high,Dealer;Repair
+Hydraulic cylinder parts,hydraulics,92,high,Dealer;Seals
+Hydraulic valves,hydraulics,93,high,Dealer;Solenoid valves;Plastics
+Hydraulic valve blocks,hydraulics,90,high,Dealer;Aluminium
+Hydraulic pumps,hydraulics,89,high,Dealer;Repair
+Hydraulic motors,hydraulics,88,high,Dealer;Repair
+High pressure hydraulics,hydraulics,86,high,Dealer;Hoses;Service
+Industrial hydraulics,hydraulics,83,high,Dealer;Service
+Mobile hydraulics,hydraulics,88,high,Dealer;Service
+Hydraulic power units,hydraulics,78,medium,Dealer;Service
+Pump components,hydraulics,90,high,Dealer;Plastics
+Valve components,hydraulics,91,high,Dealer;Plastics;Electronics
+Industrial valve manufacturers,hydraulics,82,high,Dealer;Sanitary fittings

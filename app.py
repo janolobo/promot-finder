@@ -1,7 +1,10 @@
 """Run: python app.py. A local panel, optionally in a native pywebview window."""
 from __future__ import annotations
 import argparse
+import base64
+import hmac
 import json
+import re
 import secrets
 import threading
 import webbrowser
@@ -9,11 +12,15 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from core import DIRECT_SOURCES, PROVINCES, GROUPS, PROFILES, CATEGORIES, RECIPIENTS, COUNTRIES, SOURCES, Research, export_xlsx
+from core import DIRECT_SOURCES, GROUPS, PROFILES, CATEGORIES, RECIPIENTS, COUNTRIES, SOURCES, Research, export_xlsx
+from catalogs import phrase_csv_content, phrase_csv_rows, save_phrase_csv, save_phrase_rows
 
 ROOT = Path(__file__).resolve().parent
 TOKEN = secrets.token_urlsafe(32)
 EXPORT_LOCK = threading.Lock()
+PUBLIC_MODE = False
+AUTH_USER = ''
+AUTH_PASSWORD = ''
 research = Research(ROOT / 'wyniki')
 
 def map_document(snapshot):
@@ -44,11 +51,44 @@ class Handler(BaseHTTPRequestHandler):
         self.reply(json.dumps(value, ensure_ascii=False), code=code)
 
     def valid_host(self):
-        return self.headers.get('Host') == f'127.0.0.1:{self.server.server_port}'
+        host = self.headers.get('Host', '').lower()
+        if host in (f'127.0.0.1:{self.server.server_port}', f'localhost:{self.server.server_port}'):
+            return True
+        return PUBLIC_MODE and bool(re.fullmatch(r'[a-z0-9-]+\.trycloudflare\.com(?::443)?', host))
+
+    def authorized(self):
+        if not PUBLIC_MODE:
+            return True
+        value = self.headers.get('Authorization', '')
+        if not value.startswith('Basic '):
+            return False
+        try:
+            supplied = base64.b64decode(value[6:], validate=True).decode('utf-8')
+        except (ValueError, UnicodeDecodeError):
+            return False
+        expected = f'{AUTH_USER}:{AUTH_PASSWORD}'
+        return hmac.compare_digest(supplied, expected)
+
+    def require_access(self):
+        if not self.valid_host():
+            self.json_reply({'error': 'Niedozwolony host'}, 403)
+            return False
+        if not self.authorized():
+            content = b'Wymagane logowanie do panelu PROMOT.'
+            self.send_response(401)
+            self.send_header('WWW-Authenticate', 'Basic realm="PROMOT", charset="UTF-8"')
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            self.send_header('Content-Length', str(len(content)))
+            self.send_header('Cache-Control', 'no-store')
+            self.send_header('X-Content-Type-Options', 'nosniff')
+            self.end_headers()
+            self.wfile.write(content)
+            return False
+        return True
 
     def do_GET(self):
-        if not self.valid_host():
-            return self.json_reply({'error': 'Niedozwolony host'}, 403)
+        if not self.require_access():
+            return
         path = urlparse(self.path).path
         if path == '/':
             html = (ROOT / 'static' / 'index.html').read_text(encoding='utf-8').replace('__TOKEN__', TOKEN)
@@ -65,13 +105,18 @@ class Handler(BaseHTTPRequestHandler):
             except (ValueError, OSError):
                 return self.json_reply({'error': 'Nie udało się odczytać ostatniej sesji'}, 500)
         if path == '/api/options':
-            return self.json_reply(dict(direct_sources={k:v[0] for k,v in DIRECT_SOURCES.items()}, provinces=PROVINCES, groups=GROUPS, profiles={k:v[0] for k,v in PROFILES.items()}, categories={k:v[0] for k,v in CATEGORIES.items()}, recipients={k:v[0] for k,v in RECIPIENTS.items()}, sources={k:v[0] for k,v in SOURCES.items()}, countries={k:v[0] for k,v in COUNTRIES.items()}))
+            return self.json_reply(dict(direct_sources={k:v[0] for k,v in DIRECT_SOURCES.items()}, cache_counts=research.cache_counts, phrase_counts={key: len(phrase_csv_rows(key)) for key in ('web', 'osm')}, groups=GROUPS, profiles={k:v[0] for k,v in PROFILES.items()}, categories={k:v[0] for k,v in CATEGORIES.items()}, recipients={k:v[0] for k,v in RECIPIENTS.items()}, sources={k:v[0] for k,v in SOURCES.items()}, countries={k:v[0] for k,v in COUNTRIES.items()}))
         if path == '/api/preview':
             return self.preview()
         if self.headers.get('X-Panel-Token') != TOKEN:
             return self.json_reply({'error': 'Brak tokenu panelu'}, 403)
         if path == '/api/state':
             return self.json_reply(research.snapshot())
+        if path == '/api/catalog-rows':
+            return self.json_reply({'rows': research.catalog_rows()})
+        if path == '/api/phrase-csv':
+            source = (parse_qs(urlparse(self.path).query).get('source') or [''])[0]
+            return self.json_reply({'source': source, 'content': phrase_csv_content(source), 'rows': phrase_csv_rows(source)})
         if path in ['/api/xlsx', '/api/html', '/api/log']:
             snapshot = research.snapshot()
             if not snapshot['run_id']:
@@ -108,7 +153,9 @@ class Handler(BaseHTTPRequestHandler):
         return self.reply(content, kind, cache=True)
 
     def do_POST(self):
-        if not self.valid_host() or self.headers.get('X-Panel-Token') != TOKEN:
+        if not self.require_access():
+            return
+        if self.headers.get('X-Panel-Token') != TOKEN:
             return self.json_reply({'error': 'Brak autoryzacji lokalnego panelu'}, 403)
         try:
             length = int(self.headers.get('Content-Length', 0))
@@ -140,24 +187,49 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == '/api/locate':
                 research.start_locations()
                 return self.json_reply({'ok': True})
+            if self.path == '/api/translate':
+                research.start_translate(data)
+                return self.json_reply({'ok': True})
             if self.path == '/api/stop':
-                research.stop.set()
+                research.abort()
                 return self.json_reply({'ok': True})
             if self.path == '/api/regon':
                 from regon import start_lookup
                 start_lookup(research, data.get('ids'), data.get('key', ''))
                 return self.json_reply({'ok': True})
+            if self.path == '/api/catalog':
+                if research.running:
+                    raise ValueError('Poczekaj na zakończenie bieżącego zadania')
+                removed = research.clear_catalog(str(data.get('catalog') or ''))
+                return self.json_reply({'ok': True, 'removed': removed, 'cache_counts': research.cache_counts})
+            if self.path == '/api/phrase-csv':
+                if research.running:
+                    raise ValueError('Poczekaj na zakończenie bieżącego zadania')
+                rows = save_phrase_rows(data.get('source'), data.get('rows')) if 'rows' in data else save_phrase_csv(data.get('source'), data.get('content'))
+                return self.json_reply({'ok': True, 'rows': rows})
             self.json_reply({'error': 'Nie znaleziono'}, 404)
         except (ValueError, TypeError, KeyError) as exc:
             self.json_reply({'error': str(exc)}, 400)
 
 def main():
+    global PUBLIC_MODE, AUTH_USER, AUTH_PASSWORD
     parser = argparse.ArgumentParser(description='PROMOT — panel poszukiwania kontrahentów')
     parser.add_argument('--browser', action='store_true', help='Otwórz panel w przeglądarce zamiast osobnego okna')
     parser.add_argument('--no-open', action='store_true', help='Uruchom sam serwer lokalny')
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--latest-map', action='store_true', help='Otwórz mapę ostatniej zapisanej sesji przez lokalny serwer')
+    parser.add_argument('--public', action='store_true', help='Wymagaj logowania i zezwól na dostęp przez trycloudflare.com')
     args = parser.parse_args()
+    if args.public:
+        try:
+            auth = json.loads((ROOT / '.promot-auth.json').read_text(encoding='utf-8'))
+            AUTH_USER = str(auth['username'])
+            AUTH_PASSWORD = str(auth['password'])
+            if not AUTH_USER or len(AUTH_PASSWORD) < 16:
+                raise ValueError
+        except (OSError, ValueError, TypeError, KeyError):
+            parser.error('Tryb publiczny wymaga pliku .promot-auth.json z silnym loginem i hasłem')
+        PUBLIC_MODE = True
     try:
         server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     except OSError:

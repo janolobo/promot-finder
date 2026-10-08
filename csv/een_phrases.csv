@@ -1,0 +1,12 @@
+phrase,category,priority,forging_probability,negative_keywords
+forging,transmissions,96,high,
+forged,transmissions,95,high,
+machining,transmissions,80,medium,
+shaft,transmissions,97,high,
+axle,automotive,97,high,
+gearbox,transmissions,96,high,
+transmission,transmissions,94,high,
+hydraulic,hydraulics,93,high,
+railway,railway,90,high,
+agricultural machinery,agriculture,92,high,
+construction machinery,construction,88,high,

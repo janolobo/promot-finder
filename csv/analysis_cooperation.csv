@@ -1,0 +1,11 @@
+phrase,category,priority,forging_probability,negative_keywords
+CNC,transmissions,90,medium,sklep;software
+obróbka skrawaniem,transmissions,94,high,
+toczenie CNC,transmissions,88,medium,
+frezowanie,transmissions,86,medium,drewno
+Lohnfertigung,transmissions,92,high,Händler
+machining,transmissions,87,medium,software
+kooperacja,transmissions,85,medium,
+obrábění,transmissions,89,high,
+Zerspanung,transmissions,91,high,
+subcontracting,transmissions,84,medium,software

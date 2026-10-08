@@ -1,0 +1,53 @@
+phrase,category,priority,forging_probability,negative_keywords
+Gesenkschmiedeteile,automotive,100,high,Händler;Software
+Schmiedeteile,automotive,99,high,Händler;Kunstschmiede
+Freiformschmiedeteile,automotive,96,high,Händler;Kunstschmiede
+Die Forging,automotive,98,high,Dealer;Software
+Closed die forging,automotive,97,high,Dealer
+Drop forging,automotive,96,high,Dealer
+Forged parts,automotive,95,high,Dealer;Spare parts trade
+Forged components,automotive,94,high,Dealer;Spare parts trade
+Upset forging,automotive,93,high,Dealer
+Stauchteile,automotive,92,high,Händler
+Warmumformung,automotive,90,high,Händler
+Fahrwerksteile,automotive,94,high,Händler;Gummi
+Achsteile,automotive,95,high,Händler;Ersatzteilhandel
+Lenkungsteile,automotive,93,high,Händler;Elektronik
+Automobilzulieferer,automotive,80,medium,Händler;Software
+Antriebswellen,transmissions,100,high,Händler;Reparatur
+Getriebewellen,transmissions,100,high,Händler;Reparatur
+Kurbelwellen,transmissions,98,high,Händler;Reparatur
+Industriegetriebe,transmissions,92,high,Händler;Reparatur
+Drive shafts,transmissions,99,high,Dealer;Repair
+Gear shafts,transmissions,99,high,Dealer;Repair
+Landmaschinenteile,agriculture,90,high,Händler;Ersatzteilhandel
+Traktorachsen,agriculture,97,high,Händler;Ersatzteilhandel
+Agricultural machinery,agriculture,82,high,Dealer;Rental
+Baumaschinenteile,mining,91,high,Händler;Ersatzteilhandel
+Construction machinery parts,mining,90,high,Dealer;Spare parts trade
+Baggerteile,mining,88,high,Händler;Ersatzteilhandel
+Schienenfahrzeugteile,railway,96,high,Händler;Ersatzteilhandel
+Radsatzwellen,railway,100,high,Händler
+Railway axles,railway,99,high,Dealer;Spare parts trade
+Hydraulikzylinder,hydraulics,94,high,Händler;Reparatur
+Hydraulikventile,hydraulics,93,high,Händler;Magnetventile
+Industriearmaturen,hydraulics,90,high,Händler;Sanitär
+Hydraulic cylinders,hydraulics,93,high,Dealer;Repair
+Hydraulic valves,hydraulics,92,high,Dealer;Solenoid valves
+Eisenguss,construction,88,high,Händler;Kunstguss
+Gussteile,construction,80,medium,Händler;Kunstguss
+Iron castings,construction,86,high,Dealer;Art casting
+Zerspanung,construction,78,medium,Händler;Schulung
+Lohnfertigung,construction,76,medium,Händler;Software
+Metallbearbeitung,construction,74,medium,Händler;Kunststoff
+Antriebstechnik,transmissions,84,high,Händler;Elektromotoren
+Getriebeteile,transmissions,96,high,Händler;Reparatur
+Kegelräder,transmissions,91,high,Händler;Kunststoff
+Radnaben,automotive,90,high,Händler;Ersatzteilhandel
+Nutzfahrzeugteile,automotive,84,high,Händler;Karosserie
+Forging Technology,automotive,88,high,Consulting;Software
+Press forging,automotive,91,high,Dealer
+Open die forging,automotive,90,high,Dealer;Art forging
+Hydraulikkomponenten,hydraulics,92,high,Händler;Schläuche
+Mobile Hydraulik,hydraulics,86,high,Händler;Service
+Industriehydraulik,hydraulics,85,high,Händler;Service

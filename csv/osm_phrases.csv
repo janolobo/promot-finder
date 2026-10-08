@@ -1,0 +1,75 @@
+phrase,category,priority,forging_probability,negative_keywords
+Podzespołów samochodowych,automotive,96,high,handel detaliczny
+steering systems manufacturer,automotive,90,high,dealer
+Hersteller Fahrwerk Lenkung,automotive,91,high,Händler
+producent podzespołów samochodowych,automotive,94,high,handel
+steering,automotive,70,medium,software
+suspension,automotive,70,medium,
+automotive,automotive,88,high,software
+lenkung,automotive,72,medium,
+fahrwerk,automotive,74,medium,
+zawiesze,automotive,71,medium,
+Maszyn rolniczych,agriculture,95,high,handel detaliczny
+agricultural machinery manufacturer,agriculture,90,high,dealer
+Landmaschinen Hersteller,agriculture,91,high,Händler
+producent maszyn rolniczych,agriculture,93,high,handel
+agricultur,agriculture,76,medium,
+landmaschinen,agriculture,88,high,
+rolnicz,agriculture,80,high,
+zeměděl,agriculture,86,high,
+Armatury i hydrauliki,valves,94,high,handel detaliczny
+industrial valve manufacturer,valves,90,high,dealer
+Industriearmaturen Hersteller,valves,91,high,Händler
+producent armatury hydraulicznej,valves,93,high,handel
+valve,valves,72,medium,software
+armatur,valves,84,high,
+hydraul,valves,82,high,
+zawor,valves,80,high,
+zawór,valves,81,high,
+Napędów i przekładni,drives,94,high,handel detaliczny
+gearbox coupling manufacturer,drives,90,high,dealer
+Getriebe Hersteller,drives,91,high,Händler
+producent przekładni napędów,drives,93,high,handel
+gearbox,drives,86,high,repair
+coupling,drives,78,medium,
+getriebe,drives,88,high,
+przekład,drives,84,high,
+napęd,drives,76,medium,
+Maszyn budowlanych i transportu,construction,93,high,handel detaliczny
+construction equipment manufacturer,construction,89,high,dealer
+Baumaschinen Hersteller,construction,90,high,Händler
+producent maszyn budowlanych,construction,92,high,handel
+construction equipment,construction,85,high,
+baumaschinen,construction,88,high,
+budowlan,construction,80,high,
+Odkuwek,forgings,97,high,
+buyers of forgings,forgings,94,high,dealer
+Abnehmer von Schmiedeteilen,forgings,95,high,Händler
+odbiorcy odkuwek,forgings,96,high,
+odkuw,forgings,90,high,
+schmiedeteil,forgings,93,high,
+forging,forgings,86,high,software
+Gotowych części,finished,92,high,
+buyers of finished parts,finished,90,high,dealer
+Abnehmer von Fertigteilen,finished,91,high,Händler
+odbiorcy gotowych części,finished,93,high,
+fertigteil,finished,88,high,
+finished part,finished,87,high,
+Odlewów żeliwnych,iron,91,high,
+buyers of iron castings,iron,89,high,dealer
+Abnehmer von Eisengussteilen,iron,90,high,Händler
+odbiorcy odlewów żeliwnych,iron,92,high,
+żeliw,iron,86,high,
+gusseisen,iron,88,high,
+iron casting,iron,87,high,
+automotive buyers,automotive,84,medium,dealer
+Automotive-Abnehmer,automotive,84,medium,Händler
+odbiorcy automotive,automotive,86,medium,
+motoryzac,automotive,78,medium,
+Elementów kutych,forged,95,high,
+buyers of forged parts,forged,93,high,dealer
+odbiorcy elementów kutych,forged,94,high,
+forged part,forged,90,high,
+geschmiedet,forged,91,high,
+Gesenkschmiede,forged,96,high,
+výrobce,agriculture,70,medium,

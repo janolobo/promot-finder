@@ -1,0 +1,11 @@
+phrase,category,priority,forging_probability,negative_keywords
+zakup odkuwek,automotive,95,high,sprzedaż detaliczna
+Einkauf Schmiedeteile,automotive,96,high,Händler
+buyers of forgings,automotive,94,high,dealer
+odbiorcy odkuwek,automotive,97,high,
+purchasing department,automotive,80,medium,software
+procurement,automotive,78,medium,software
+nákup výkovků,automotive,93,high,
+Abnehmer von Schmiedeteilen,automotive,95,high,
+buyer of finished parts,automotive,88,high,dealer
+odbiorcy części,automotive,90,high,handel detaliczny
